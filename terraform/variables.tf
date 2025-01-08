@@ -27,4 +27,11 @@ variable "domain_name" {
   type        = string
   sensitive   = false
 }
+variable "ssh_key_name" {
+  description = "ssh key name"
+  type        = string
+  sensitive   = true
+}
+
+
 

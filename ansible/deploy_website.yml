@@ -1,0 +1,22 @@
+- name: Deploy a simple website
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Copy custom HTML file from local static_site directory
+      copy:
+        src: /Users/umuttalhacaliskan/Desktop/terraform-ansible/ansible/static_site/index.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
