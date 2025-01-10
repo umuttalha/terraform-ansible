@@ -1,10 +1,10 @@
----
 - name: Install required packages
   apt:
     name:
       - golang
       - nginx
       - git
+      - rsync  # Required for synchronize module
     state: present
     update_cache: yes
 
@@ -26,18 +26,17 @@
     - "static"
     - "static/css"
 
-- name: Copy Go files
-  copy:
-    src: "{{ playbook_dir }}/../../backend/{{ item }}"
-    dest: "/opt/goapp/{{ item }}"
-    mode: '0644'
-  with_items:
-    - "main.go"
-    - "go.mod"
-    - "handlers/handlers.go"
-    - "middleware/middleware.go"
-    - "templates/index.html"
-    - "static/css/main.css"
+- name: Copy all application files
+  synchronize:
+    src: "{{ playbook_dir }}/../../backend/"
+    dest: "/opt/goapp/"
+    delete: yes
+    recursive: yes
+    rsync_opts:
+      - "--exclude=*.tmp"
+      - "--exclude=.git"
+      - "--exclude=__pycache__"
+      - "--exclude=*.pyc"
   notify: restart goapp
 
 - name: Initialize Go module
