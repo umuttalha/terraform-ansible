@@ -27,7 +27,7 @@ resource "cloudflare_record" "www" {
 resource "hcloud_server" "web" {
   name        = "web-server"
   image       = "ubuntu-24.04"
-  server_type = "cax11"
+  server_type = "cx22"
   location    = "nbg1"
   ssh_keys    = [data.hcloud_ssh_key.default.id]
 }

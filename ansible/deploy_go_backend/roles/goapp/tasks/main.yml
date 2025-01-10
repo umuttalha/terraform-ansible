@@ -1,0 +1,92 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - golang
+      - nginx
+      - git
+    state: present
+    update_cache: yes
+
+- name: Create app directory
+  file:
+    path: /opt/goapp
+    state: directory
+    mode: '0755'
+
+- name: Create required subdirectories
+  file:
+    path: "/opt/goapp/{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "handlers"
+    - "middleware"
+    - "templates"
+    - "static"
+    - "static/css"
+
+- name: Copy Go files
+  copy:
+    src: "{{ playbook_dir }}/../../backend/{{ item }}"
+    dest: "/opt/goapp/{{ item }}"
+    mode: '0644'
+  with_items:
+    - "main.go"
+    - "go.mod"
+    - "handlers/handlers.go"
+    - "middleware/middleware.go"
+    - "templates/index.html"
+    - "static/css/main.css"
+  notify: restart goapp
+
+- name: Initialize Go module
+  command:
+    cmd: go mod init goapp
+    chdir: /opt/goapp
+  args:
+    creates: /opt/goapp/go.mod
+
+- name: Install Go dependencies
+  command:
+    cmd: go mod tidy
+    chdir: /opt/goapp
+
+- name: Create systemd service file
+  template:
+    src: goapp.service.j2
+    dest: /etc/systemd/system/goapp.service
+    mode: '0644'
+  notify: restart goapp
+
+- name: Create Nginx configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/goapp
+  notify: reload nginx
+
+- name: Enable Nginx site
+  file:
+    src: /etc/nginx/sites-available/goapp
+    dest: /etc/nginx/sites-enabled/goapp
+    state: link
+  notify: reload nginx
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Enable and start goapp service
+  systemd:
+    name: goapp
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Enable and start nginx service
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started

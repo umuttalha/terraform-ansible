@@ -1,0 +1,15 @@
+[Unit]
+Description=Go Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/goapp
+ExecStart=/usr/bin/go run main.go
+Restart=always
+RestartSec=5
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[Install]
+WantedBy=multi-user.target

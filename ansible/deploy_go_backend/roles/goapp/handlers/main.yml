@@ -1,0 +1,11 @@
+---
+- name: restart goapp
+  systemd:
+    name: goapp
+    state: restarted
+    daemon_reload: yes
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded

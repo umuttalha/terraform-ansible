@@ -1,0 +1,8 @@
+---
+- name: Deploy Go Application
+  hosts: goservers
+  become: yes
+  vars:
+    domain_name: sisatma.com
+  roles:
+    - goapp
